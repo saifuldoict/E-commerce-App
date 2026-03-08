@@ -4,11 +4,12 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import React, { useState } from 'react'
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { useParams } from 'react-router'
 import avater from '../assets/avater.png'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
+import axios from 'axios'
 const Profile = () => {
   const {user}=useSelector(store=>store.user)
   const params = useParams()
@@ -24,6 +25,9 @@ const Profile = () => {
     role:user?.role
   })
   const [file,setFile]= useState(null)
+  const dispatch = useDispatch()
+
+
 
   const handleChange=(e)=>{
     setUpdateUser({...updateUser, [e.target.name]:e.target.value})
@@ -38,12 +42,30 @@ const Profile = () => {
     const accessToken = localStorage.getItem("accessToken")
     try {
       // use FormData for text+file
-      const formData = new formData()
+      const formData = new FormData()
       formData.append("name", updateUser.name)
       formData.append("email", updateUser.email)
-      formData.append("name", updateUser.name)
-      formData.append("name", updateUser.name)
-      formData.append("name", updateUser.name)
+      formData.append("phoneNo", updateUser.phoneNo)
+      formData.append("address", updateUser.address)
+      formData.append("city", updateUser.city)
+      formData.append("zipCode", updateUser.zipCode)
+      formData.append("role", updateUser.role)
+
+
+      if(file){
+        formData.append("file", file)    // image file for multer
+      }
+      const res= await axios.put(`http://localhost:5000/user/update/${userId}`, formData, {
+        headers:{
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "multipart/form-data"
+        }
+      })
+      if(res.data.success){
+        toast.success(res.data.message)
+        dispatch(setUser(res.data.user))
+
+      }
     } catch (error) {
       console.log(error)
       toast.error("failed to update profile")
@@ -65,7 +87,7 @@ const Profile = () => {
                       {/*profile picture*/}
                       <div className='flex flex-col items-center'>
                           <img src={updateUser?.ProfilePic || avater} alt='profile' className='w-32 h-32 rounded-full object-cover border-4'/>
-                           <Label className="mt-4 cursor-pointer bg-pink-600 text-white px-4 py-2 rounded-full">fff
+                           <Label className="mt-4 cursor-pointer bg-pink-600 text-white px-4 py-2 rounded-full">Change Picture
                             <input type='file' accept='image/*' className='hidden' onChange={handleFileChange}/>
                            </Label>
                       </div>

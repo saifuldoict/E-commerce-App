@@ -368,7 +368,7 @@ export const updateUser = async(req,res)=>{
         user.profilePic = profilePicUrl;
         user.profilePicPublicId = profilePicPublicId
        
-        const updateUser= user.save();
+       const updateUser = await user.save();
 
         return res.status(200).json({
             success:true,
